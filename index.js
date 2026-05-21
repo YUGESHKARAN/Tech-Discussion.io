@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
 
       io.to(postId).emit("newMessage", newMessage);
 
-      const notfiMesg = `Commented: ${message}`;
+      const notfiMesg = `💬 Commented: ${message}`;
       const notification = {
         postId,
         user,
