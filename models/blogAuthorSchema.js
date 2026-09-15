@@ -207,18 +207,18 @@ const authorSchema = new mongoose.Schema({
   },
 
   // achievements — embedded array, one entry per badge TYPE earned
-  badges: {
-    type:    [badgeSchema],
-    default: [],
-    validate: {
-      validator: (v) => {
-        // each badgeId can only appear once — tiers tracked in history[]
-        const ids = v.map(b => b.badgeId);
-        return new Set(ids).size === ids.length;
-      },
-      message: "Duplicate badge type — use history[] for multiple tiers",
-    },
-  },
+  // badges: {
+  //   type:    [badgeSchema],
+  //   default: [],
+  //   validate: {
+  //     validator: (v) => {
+  //       // each badgeId can only appear once — tiers tracked in history[]
+  //       const ids = v.map(b => b.badgeId);
+  //       return new Set(ids).size === ids.length;
+  //     },
+  //     message: "Duplicate badge type — use history[] for multiple tiers",
+  //   },
+  // },
 
   recentlyViewed: {
   posts: {
