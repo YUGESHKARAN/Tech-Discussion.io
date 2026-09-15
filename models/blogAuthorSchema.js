@@ -35,39 +35,19 @@ const messageSchema = new mongoose.Schema({
   timestamp: { type: Date,   default: Date.now },
 });
 
-const notificationSchema = new mongoose.Schema(
-  {
-    postId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Post',
-      required: false,
-    },
-    user: {
-      type: String,
-      required: true,
-    },
-    message: {
-      type: String,
-      required: true,
-    },
-    profile:{
-      type:String,
-      required:false
-    },
-    url:{
-      type:String,
-      required:true
-    },
-    authorEmail: {
-      type: String,
-      required: true,
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-    },
-  }
-)
+const notificationSchema = new mongoose.Schema({
+  postId:      { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: false },
+  communityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community', required: false },
+  discussionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Discussion', required: false },
+  type:        { type: String, required: false },
+  user:        { type: String, required: true  },
+  message:     { type: String, required: true  },
+  profile:     { type: String, required: false },
+  url:         { type: String, required: true  },
+  authorEmail: { type: String, required: true  },
+  timestamp:   { type: Date,   default: Date.now },
+});
+
 
 const announcementSchema = new mongoose.Schema(
   {
@@ -131,86 +111,44 @@ const announcementSchema = new mongoose.Schema(
 )
 
 const postSchema = new mongoose.Schema({
-  // Back-reference to the author who owns this post
-  authorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Author',
-    required: true,
-  },
-
-  title: {
-    type: String,
-    required: true,
-  },
-  image: {
-    type: String,
-    required: false, // Image is optional
-  },
+  authorId:    { type: mongoose.Schema.Types.ObjectId, ref: 'Author', required: true },
+  title:       { type: String, required: true  },
+  image:       { type: String, required: false },
+  tenantId:    { type: String, required: true}, 
   links: {
-    type: [
-      {
-        title: { type: String, required: false }, // Title of the link
-        url: { type: String, required: false },  // URL of the link
-      },
-    ],
+    type: [{ title: { type: String, required: false }, url: { type: String, required: false } }],
     default: [],
     validate: {
-      validator: function (v) {
-        // Ensure all entries have unique URLs
-        return Array.isArray(v) && new Set(v.map(link => link.url)).size === v.length;
-      },
+      validator: (v) => Array.isArray(v) && new Set(v.map(l => l.url)).size === v.length,
       message: "Links array must contain unique URLs",
     },
   },
-
   documents: {
-    type: [String],
-    default: [],
-    required: false,
+    type: [String], default: [], required: false,
     validate: {
-      validator: function (v) {
-        return Array.isArray(v) && new Set(v).size === v.length; // Ensure all entries are unique
-      },
+      validator: (v) => Array.isArray(v) && new Set(v).size === v.length,
       message: "pdfs array must contain unique values",
     },
   },
-  description: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
+  description: { type: String, required: true },
+  category:    { type: String, required: true },
   views: {
-    type: [String],
-    default: [],
+    type: [String], default: [],
     validate: {
-      validator: function (v) {
-        return Array.isArray(v) && new Set(v).size === v.length; // Ensure all entries are unique
-      },
+      validator: (v) => Array.isArray(v) && new Set(v).size === v.length,
       message: "Views array must contain unique values",
     },
   },
   likes: {
-    type: [String],
-    default: [],
+    type: [String], default: [],
     validate: {
-      validator: function (v) {
-        return Array.isArray(v) && new Set(v).size === v.length; // Ensure all entries are unique
-      },
+      validator: (v) => Array.isArray(v) && new Set(v).size === v.length,
       message: "Views array must contain unique values",
     },
   },
-  // messages: [messageSchema], // Messages linked to the post
-  messages: {
-    type: [messageSchema],
-    default: []
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now, // Automatically set to the current date
-  },
+  messages:  { type: [messageSchema], default: [] },
+  
+  timestamp: { type: Date, default: Date.now },
 });
 
 // ── Post indexes ──
@@ -226,99 +164,91 @@ const Post = mongoose.model('Post', postSchema);
 //  Author Schema  (normalized — posts stores ObjectId refs)
 // ─────────────────────────────────────────────────────────────
 const authorSchema = new mongoose.Schema({
-  authorname: {
-    type: String,
-    required: true,
-  },
+  authorname: { type: String, required: true },
   bio: { type: String, required: false },
-
-  role: {
-    type: String,
-    enum: ['student', 'coordinator', 'admin'],
-    default: 'student'
-  },
-  community: {
-    type: [String],
-    default: []
-  },
-
+  role:       { type: String, enum: ['student', 'coordinator', 'admin', 'director'], default: 'student' },
+  community:  { type: [String], default: [] },
   announcement: [announcementSchema],
-  // Store bookmarked post ids (unique ObjectIds referencing posts within authors' posts)
   postBookmark: {
-    type: [mongoose.Schema.Types.ObjectId],
-    default: [],
+    type: [mongoose.Schema.Types.ObjectId], default: [],
     validate: {
-      validator: function (v) {
-        return Array.isArray(v) && new Set(v.map(id => id.toString())).size === v.length;
-      },
-      message: "postBookmark must contain unique post IDs"
-    }
+      validator: (v) => Array.isArray(v) && new Set(v.map(id => id.toString())).size === v.length,
+      message: "postBookmark must contain unique post IDs",
+    },
   },
+  password: { type: String, required: true },
+  tenantId: { type: String, required: true },
 
-  password: {
-    type: String,
-    required: true,
-  },
   email: {
-    type: String,
-    required: true,
-    unique: true,
-    match: [emailRegex, 'Please provide a valid email address'] // Ensure each email is unique
+    type: String, required: true, unique: true,
+    match: [emailRegex, 'Please provide a valid email address'],
   },
-  profile: {
-    type: String,
-    required: false, // Image is optional
-  },
-  followers: {
-    type: [String],
-    default: []
-  },
-  following: {
-    type: [String], // Emails of authors the user follows
-    default: []
-  },
-
-  // ── NORMALIZED: store Post ObjectIds instead of embedded documents ──
-  posts: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Post',
-    default: [],
-  },
-  // ────────────────────────────────────────────────────────────────────
-
+  profile:   { type: String,   required: false },
+  followers: { type: [String], default: [] },
+  following: { type: [String], default: [] },
+  posts:     { type: [mongoose.Schema.Types.ObjectId], ref: 'Post', default: [] },
   notification: [notificationSchema],
-
   personalLinks: {
-    type: [
-      {
-        title: { type: String, required: false }, // Title of the link
-        url: { type: String, required: false },   // URL of the link
-      },
-    ],
+    type: [{ title: { type: String, required: false }, url: { type: String, required: false } }],
     default: [],
     validate: {
       validator: function (v) {
-        // Ensure all entries have unique URLs and maximum count is 5
-        const isUnique = Array.isArray(v) && new Set(v.map(link => link.url)).size === v.length;
+        const isUnique  = Array.isArray(v) && new Set(v.map(l => l.url)).size === v.length;
         const isMaxFive = v.length <= 5;
         return isUnique && isMaxFive;
       },
       message: props => {
-        const urls = props.value.map(link => link.url);
-        const hasDuplicates = new Set(urls).size !== urls.length;
-        if (hasDuplicates) {
-          return "Links array must contain unique URLs.";
-        }
-        if (props.value.length > 5) {
-          return "You can only add up to 5 links.";
-        }
+        const urls = props.value.map(l => l.url);
+        if (new Set(urls).size !== urls.length) return "Links array must contain unique URLs.";
+        if (props.value.length > 5)             return "You can only add up to 5 links.";
         return "Invalid personal links.";
       },
     },
   },
 
-  otp: { type: String }, // OTP for password reset
-  otpExpiresAt: { type: Date } // Expiry time for the OTP
+  // achievements — embedded array, one entry per badge TYPE earned
+  badges: {
+    type:    [badgeSchema],
+    default: [],
+    validate: {
+      validator: (v) => {
+        // each badgeId can only appear once — tiers tracked in history[]
+        const ids = v.map(b => b.badgeId);
+        return new Set(ids).size === ids.length;
+      },
+      message: "Duplicate badge type — use history[] for multiple tiers",
+    },
+  },
+
+  recentlyViewed: {
+  posts: {
+    type: [{
+      authorEmail:{type: String, required: true},
+      authorName:{type: String, required: true},
+      postId:   { type: mongoose.Schema.Types.ObjectId, ref: 'Post', required: true },
+      viewedAt: { type: Date, default: Date.now },
+    }],
+    default: [],
+  },
+  playlists: {
+   
+    type: [{
+      authorEmail:{type: String},
+      authorName:{type: String},
+      playlistId: { type: mongoose.Schema.Types.ObjectId, ref: 'TutorPlayList', required: true },
+      viewedAt:   { type: Date, default: Date.now },
+    }],
+    default: [],
+  },
+},
+
+// so effectiveStreak() on the frontend computes correctly against IST midnight.
+currentStreak:  { type: Number, default: 0 },
+longestStreak:  { type: Number, default: 0 },
+lastActiveDate: { type: String, default: null }, // "YYYY-MM-DD" IST
+  
+  otp:          { type: String },
+  otpExpiresAt: { type: Date   },
 });
 
 
