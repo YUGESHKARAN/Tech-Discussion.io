@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const { Notification } = require('./notificationSchema');
+const { notificationSchema } = require('./notificationSchema');
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Message schema
@@ -190,7 +190,7 @@ const authorSchema = new mongoose.Schema({
   posts:     { type: [mongoose.Schema.Types.ObjectId], ref: 'Post', default: [] },
   // notification: [notificationSchema],
    notification:  {
-    type: [Notification],
+    type: [notificationSchema],
     default: [],
   },
   personalLinks: {

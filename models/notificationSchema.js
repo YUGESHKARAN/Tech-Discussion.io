@@ -54,4 +54,4 @@ const buildNotificationUrl = {
 };
 
 const Notification = mongoose.model("Notification", notificationSchema);
-module.exports = { Notification, NOTIFICATION_TYPES, buildNotificationUrl };
+module.exports = { Notification, notificationSchema, NOTIFICATION_TYPES, buildNotificationUrl };
