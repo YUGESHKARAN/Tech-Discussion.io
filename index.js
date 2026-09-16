@@ -12,7 +12,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 
-const { NOTIFICATION_TYPES, buildNotificationUrl } = require("./models/notificationSchema")
+const { NOTIFICATION_TYPES,  buildNotificationUrl } = require("./models/notificationSchema")
 
 const connectToDatabase = require("./db");
 
