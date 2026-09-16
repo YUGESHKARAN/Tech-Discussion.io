@@ -11,6 +11,9 @@ if (process.env.NODE_ENV === "development") {
   dns.setServers(["8.8.8.8", "8.8.4.4"]);
 }
 
+
+const { NOTIFICATION_TYPES, buildNotificationUrl } = require("./models/notificationSchema")
+
 const connectToDatabase = require("./db");
 
 // fix: import BOTH models from the shared normalized schema
@@ -252,12 +255,12 @@ io.on("connection", (socket) => {
       const notfiMesg = `Your post "${post.title}" got engaged with comments.`;
       const notification = {
         postId,
-        user:"Post engagement",
-        type:"post-engaged",
+        user:"Post engaged",
+        type: NOTIFICATION_TYPES.POST_ENGAGED,
         message: notfiMesg,
         profile,
         authorEmail,
-        url,
+        url: buildNotificationUrl.post(authorEmail, postId),
         timestamp: new Date(),
       };
 
